@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useApiClient } from "../lib/useApiClient";
 
 interface Ticker {
+  id: string;
   symbol: string;
   name: string;
 }
@@ -16,6 +18,7 @@ export default function TickersList() {
   const [tickers, setTickers] = useState<Ticker[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const apiClient = useApiClient();
 
   useEffect(() => {
@@ -42,6 +45,10 @@ export default function TickersList() {
 
     fetchTickers();
   }, []);
+
+  const handleShowTicker = (ticker: Ticker) => {
+    router.push(`/dashboard/ticker/${ticker.id}`);
+  };
 
   if (loading) {
     return (
@@ -92,8 +99,16 @@ export default function TickersList() {
                 </h4>
                 <p className="text-sm text-gray-600">{ticker.name}</p>
               </div>
-              <div className="text-xs text-gray-400 font-mono">
-                {ticker.symbol}
+              <div className="flex items-center space-x-3">
+                <div className="text-xs text-gray-400 font-mono">
+                  {ticker.symbol}
+                </div>
+                <button
+                  onClick={() => handleShowTicker(ticker)}
+                  className="px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
+                >
+                  Show
+                </button>
               </div>
             </div>
           </div>

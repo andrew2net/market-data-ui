@@ -1,7 +1,11 @@
 "use client";
 import { useRouter } from "next/navigation";
 
-export default function TopNavBar() {
+interface TopNavBarProps {
+  title?: string;
+}
+
+export default function TopNavBar({ title }: TopNavBarProps) {
   const router = useRouter();
 
   const handleLogout = () => {
@@ -16,15 +20,19 @@ export default function TopNavBar() {
   };
 
   return (
-    <nav className="bg-white shadow-md px-6 py-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-800">Market Data</h2>
-        <button
-          onClick={handleLogout}
-          className="text-gray-600 hover:text-red-600 font-medium cursor-pointer"
-        >
-          Logout
-        </button>
+    <nav className="bg-white shadow-sm border-b">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {title && (
+            <h1 className="text-2xl font-bold text-gray-700">{title}</h1>
+          )}
+          <button
+            onClick={handleLogout}
+            className="text-gray-600 hover:text-red-600 font-medium cursor-pointer"
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </nav>
   );
