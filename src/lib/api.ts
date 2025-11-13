@@ -41,6 +41,7 @@ export class ApiClient {
 
       // Handle 401 unauthorized
       if (response.status === 401) {
+        localStorage.removeItem('token');
         if (this.onUnauthorized) {
           this.onUnauthorized();
         }

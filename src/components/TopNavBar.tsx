@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 interface TopNavBarProps {
   title?: string;
@@ -20,18 +21,19 @@ export default function TopNavBar({ title }: TopNavBarProps) {
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-background border-b">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {title && (
-            <h1 className="text-2xl font-bold text-gray-700">{title}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{title}</h1>
           )}
-          <button
+          <Button
             onClick={handleLogout}
-            className="text-gray-600 hover:text-red-600 font-medium cursor-pointer"
+            variant="ghost"
+            className="text-muted-foreground hover:text-destructive hover:cursor-pointer"
           >
             Logout
-          </button>
+          </Button>
         </div>
       </div>
     </nav>

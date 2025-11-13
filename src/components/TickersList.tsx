@@ -3,11 +3,23 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApiClient } from "../lib/useApiClient";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 interface Ticker {
   id: string;
   symbol: string;
   name: string;
+  status: string;
+  error_message: string;
 }
 
 interface TickersResponse {
@@ -44,7 +56,7 @@ export default function TickersList() {
     };
 
     fetchTickers();
-  }, []);
+  }, [apiClient]);
 
   const handleShowTicker = (ticker: Ticker) => {
     router.push(`/dashboard/ticker/${ticker.id}`);
@@ -89,31 +101,43 @@ export default function TickersList() {
         </p>
       </div>
 
-      <div className="divide-y divide-gray-200">
-        {tickers.map((ticker) => (
-          <div key={ticker.symbol} className="px-6 py-4 hover:bg-gray-50">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-medium text-gray-900">
-                  {ticker.symbol}
-                </h4>
-                <p className="text-sm text-gray-600">{ticker.name}</p>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="text-xs text-gray-400 font-mono">
-                  {ticker.symbol}
-                </div>
-                <button
-                  onClick={() => handleShowTicker(ticker)}
-                  className="px-3 py-1 text-xs font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
-                >
-                  Show
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Symbol</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Staus</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {tickers.map((ticker) => (
+            <TableRow
+              key={ticker.symbol}
+              className="cursor-pointer hover:bg-gray-50"
+              onClick={() => handleShowTicker(ticker)}
+            >
+              <TableCell className="font-medium">{ticker.symbol}</TableCell>
+              <TableCell>{ticker.name}</TableCell>
+              <TableCell>
+                {ticker.error_message ? (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      {ticker.status}
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {ticker.error_message}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Badge>
+                    {ticker.status}
+                  </Badge>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
