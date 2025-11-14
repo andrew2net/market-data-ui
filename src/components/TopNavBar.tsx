@@ -6,7 +6,7 @@ interface TopNavBarProps {
   title?: string;
 }
 
-export default function TopNavBar({ title }: TopNavBarProps) {
+export default function TopNavBar({ title = "Market Data" }: TopNavBarProps) {
   const router = useRouter();
 
   const handleLogout = () => {
@@ -24,9 +24,7 @@ export default function TopNavBar({ title }: TopNavBarProps) {
     <nav className="bg-background border-b">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {title && (
-            <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-          )}
+          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
           <Button
             onClick={handleLogout}
             variant="ghost"

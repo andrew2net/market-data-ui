@@ -57,20 +57,15 @@ describe('TopNavBar', () => {
 
     // Check nav element structure
     const nav = screen.getByRole('navigation')
-    expect(nav).toHaveClass('bg-white', 'shadow-md', 'px-6', 'py-4')
+    expect(nav).toHaveClass('bg-background', 'border-b')
 
     // Check title styling
     const title = screen.getByText('Market Data')
-    expect(title).toHaveClass('text-xl', 'font-semibold', 'text-gray-800')
+    expect(title).toHaveClass('text-2xl', 'font-bold', 'text-foreground')
 
     // Check logout button styling
     const logoutButton = screen.getByText('Logout')
-    expect(logoutButton).toHaveClass(
-      'text-gray-600',
-      'hover:text-red-600',
-      'font-medium',
-      'cursor-pointer'
-    )
+    expect(logoutButton).toHaveClass('text-muted-foreground', 'hover:text-destructive', 'hover:cursor-pointer')
   })
 
   it('clears localStorage tokens when logout is clicked', async () => {

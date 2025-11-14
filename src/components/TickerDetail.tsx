@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useApiClient } from "../lib/useApiClient";
+import  TickerBadge  from "./TickerBadge";
 
 interface TickerDetailData {
   id: string;
   symbol: string;
   name: string;
+  status: string;
+  error_message: string;
 }
 
 interface TickerDetailProps {
@@ -92,7 +95,10 @@ export default function TickerDetail({ tickerId, onBack }: TickerDetailProps) {
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium text-gray-900">{ticker.symbol}</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-medium text-gray-900">{ticker.symbol}</h3>
+              <TickerBadge status={ticker.status} error_message={ticker.error_message} />
+            </div>
             <p className="text-sm text-gray-600 mt-1">{ticker.name}</p>
           </div>
           <button

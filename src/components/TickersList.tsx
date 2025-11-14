@@ -11,8 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
+import TickerBadge from "./TickerBadge";
 
 interface Ticker {
   id: string;
@@ -104,9 +103,9 @@ export default function TickersList() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Symbol</TableHead>
+            <TableHead className="w-25">Symbol</TableHead>
             <TableHead>Name</TableHead>
-            <TableHead>Staus</TableHead>
+            <TableHead className="w-22 text-center">Staus</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -118,21 +117,8 @@ export default function TickersList() {
             >
               <TableCell className="font-medium">{ticker.symbol}</TableCell>
               <TableCell>{ticker.name}</TableCell>
-              <TableCell>
-                {ticker.error_message ? (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      {ticker.status}
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {ticker.error_message}
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Badge>
-                    {ticker.status}
-                  </Badge>
-                )}
+              <TableCell className="text-center">
+                <TickerBadge status={ticker.status} error_message={ticker.error_message} />
               </TableCell>
             </TableRow>
           ))}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import TickersList from '../TickersList';
 
@@ -30,29 +30,46 @@ describe('TickersList', () => {
     (useApiClient as jest.Mock).mockReturnValue(mockApiClient);
   });
 
-  test('renders loading state initially', () => {
-    // Make the API call hang to test loading state
-    mockApiClient.get.mockImplementation(() => new Promise(() => {}));
+  test('renders loading state initially', async () => {
+    // Make the API call take a while to test loading state
+    let resolvePromise: (value: { data: { data: unknown[] } }) => void;
+    const mockPromise = new Promise<{ data: { data: unknown[] } }>((resolve) => {
+      resolvePromise = resolve;
+    });
+    mockApiClient.get.mockReturnValue(mockPromise);
 
-    render(<TickersList />);
+    await act(async () => {
+      render(<TickersList />);
+    });
 
     expect(screen.getByText('Loading tickers...')).toBeInTheDocument();
+
+    // Resolve the promise to clean up
+    await act(async () => {
+      resolvePromise!({ data: { data: [] } });
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading tickers...')).not.toBeInTheDocument();
+    });
   });
 
   test('renders tickers successfully', async () => {
     const mockTickersData = {
       data: {
         data: [
-          { symbol: 'AAPL', name: 'Apple Inc.' },
-          { symbol: 'GOOGL', name: 'Alphabet Inc.' },
-          { symbol: 'MSFT', name: 'Microsoft Corporation' },
+          { id: '1', symbol: 'AAPL', name: 'Apple Inc.', status: 'active', error_message: '' },
+          { id: '2', symbol: 'GOOGL', name: 'Alphabet Inc.', status: 'active', error_message: '' },
+          { id: '3', symbol: 'MSFT', name: 'Microsoft Corporation', status: 'active', error_message: '' },
         ],
       },
     };
 
     mockApiClient.get.mockResolvedValue(mockTickersData);
 
-    render(<TickersList />);
+    await act(async () => {
+      render(<TickersList />);
+    });
 
     // Wait for loading to complete
     await waitFor(() => {
@@ -63,13 +80,13 @@ describe('TickersList', () => {
     expect(screen.getByText('Market Tickers')).toBeInTheDocument();
     expect(screen.getByText('3 tickers available')).toBeInTheDocument();
 
-    expect(screen.getAllByText('AAPL')).toHaveLength(2); // Symbol appears twice
+    expect(screen.getByText('AAPL')).toBeInTheDocument();
     expect(screen.getByText('Apple Inc.')).toBeInTheDocument();
 
-    expect(screen.getAllByText('GOOGL')).toHaveLength(2); // Symbol appears twice
+    expect(screen.getByText('GOOGL')).toBeInTheDocument();
     expect(screen.getByText('Alphabet Inc.')).toBeInTheDocument();
 
-    expect(screen.getAllByText('MSFT')).toHaveLength(2); // Symbol appears twice
+    expect(screen.getByText('MSFT')).toBeInTheDocument();
     expect(screen.getByText('Microsoft Corporation')).toBeInTheDocument();
   });
 
@@ -81,7 +98,9 @@ describe('TickersList', () => {
 
     mockApiClient.get.mockResolvedValue(errorResponse);
 
-    render(<TickersList />);
+    await act(async () => {
+      render(<TickersList />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Error loading tickers')).toBeInTheDocument();
@@ -98,15 +117,19 @@ describe('TickersList', () => {
 
     mockApiClient.get.mockResolvedValue(emptyResponse);
 
-    render(<TickersList />);
+    await act(async () => {
+      render(<TickersList />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('No tickers available')).toBeInTheDocument();
     });
   });
 
-  test('calls correct API endpoint', () => {
-    render(<TickersList />);
+  test('calls correct API endpoint', async () => {
+    await act(async () => {
+      render(<TickersList />);
+    });
 
     expect(mockApiClient.get).toHaveBeenCalledWith('/tickers');
   });
@@ -114,7 +137,9 @@ describe('TickersList', () => {
   test('handles network errors gracefully', async () => {
     mockApiClient.get.mockRejectedValue(new Error('Network error'));
 
-    render(<TickersList />);
+    await act(async () => {
+      render(<TickersList />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Error loading tickers')).toBeInTheDocument();
@@ -126,14 +151,16 @@ describe('TickersList', () => {
     const singleTickerData = {
       data: {
         data: [
-          { symbol: 'AAPL', name: 'Apple Inc.' },
+          { id: '1', symbol: 'AAPL', name: 'Apple Inc.', status: 'active', error_message: '' },
         ],
       },
     };
 
     mockApiClient.get.mockResolvedValue(singleTickerData);
 
-    render(<TickersList />);
+    await act(async () => {
+      render(<TickersList />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('1 ticker available')).toBeInTheDocument();
