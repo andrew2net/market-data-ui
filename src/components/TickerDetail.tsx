@@ -10,6 +10,7 @@ interface TickerDetailData {
   name: string;
   status: string;
   error_message: string;
+  enabled: boolean;
 }
 
 interface TickerDetailProps {
@@ -21,6 +22,7 @@ export default function TickerDetail({ tickerId, onBack }: TickerDetailProps) {
   const [ticker, setTicker] = useState<TickerDetailData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [updating, setUpdating] = useState<boolean>(false);
   const apiClient = useApiClient();
 
   useEffect(() => {
@@ -47,6 +49,28 @@ export default function TickerDetail({ tickerId, onBack }: TickerDetailProps) {
 
     fetchTickerDetail();
   }, [apiClient, tickerId]);
+
+  const handleEnableTicker = async () => {
+    if (!ticker) return;
+
+    try {
+      setUpdating(true);
+      setError(null);
+
+      const response = await apiClient.put(`/tickers/${tickerId}`, { enabled: true });
+
+      if (response.error) {
+        setError(response.error);
+      } else {
+        // Update the local ticker state to reflect the change
+        setTicker(prev => prev ? { ...prev, enabled: true } : null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to enable ticker');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -98,15 +122,31 @@ export default function TickerDetail({ tickerId, onBack }: TickerDetailProps) {
             <div className="flex items-center gap-3">
               <h3 className="text-lg font-medium text-gray-900">{ticker.symbol}</h3>
               <TickerBadge status={ticker.status} error_message={ticker.error_message} />
+              {ticker.enabled && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Enabled
+                </span>
+              )}
             </div>
             <p className="text-sm text-gray-600 mt-1">{ticker.name}</p>
           </div>
-          <button
-            onClick={onBack}
-            className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
-          >
-            ← Back to list
-          </button>
+          <div className="flex items-center gap-3">
+            {!ticker.enabled && (
+              <button
+                onClick={handleEnableTicker}
+                disabled={updating}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-md transition-colors"
+              >
+                {updating ? 'Enabling...' : 'Enable'}
+              </button>
+            )}
+            <button
+              onClick={onBack}
+              className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
+            >
+              ← Back to list
+            </button>
+          </div>
         </div>
       </div>
 
