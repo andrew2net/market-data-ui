@@ -1,0 +1,171 @@
+{
+  "consumer": {
+    "name": "market-data-ui"
+  },
+  "interactions": [
+    {
+      "description": "a request for tickers with error_message as string",
+      "providerStates": [
+        {
+          "name": "Tickers exist with error message"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/tickers"
+      },
+      "response": {
+        "body": {
+          "data": [
+            {
+              "error_message": "Some error",
+              "id": "1",
+              "last_fetched": null,
+              "name": "Microsoft Corp.",
+              "status": "disabled",
+              "symbol": "MSFT"
+            }
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.data": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.data[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*].status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*].symbol": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for tickers with null error_message",
+      "providerStates": [
+        {
+          "name": "Tickers exist without error message"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/tickers"
+      },
+      "response": {
+        "body": {
+          "data": [
+            {
+              "id": "1",
+              "last_fetched": null,
+              "name": "Apple Inc.",
+              "status": "enabled",
+              "symbol": "AAPL"
+            }
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.data": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.data[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*].status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*].symbol": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "16.0.4"
+    },
+    "pactRust": {
+      "ffi": "0.4.28",
+      "models": "1.3.5"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "market-data-api"
+  }
+}

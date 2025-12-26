@@ -18,7 +18,7 @@ interface Ticker {
   symbol: string;
   name: string;
   status: string;
-  error_message: string;
+  error_message: string | undefined;
 }
 
 interface TickersResponse {
