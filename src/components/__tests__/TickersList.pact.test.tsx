@@ -21,7 +21,6 @@ describe('TickersList + Pact', () => {
   const provider = new PactV3({
     consumer: 'market-data-ui',
     provider: 'market-data-api',
-    port: 1234,
     dir: 'pacts',
     logLevel: 'warn',
   });

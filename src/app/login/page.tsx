@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useApiClient } from "@/lib/useApiClient";
 
 export default function LoginPage() {
   const router = useRouter();
+  const apiClient = useApiClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -22,32 +24,28 @@ export default function LoginPage() {
       router.push("/dashboard");
       return;
     }
-    setIsLoading(false);
+    const timeoutId = setTimeout(() => setIsLoading(false), 0);
+    return () => clearTimeout(timeoutId);
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    const { data, error } = await apiClient.post<{ token: string }>(
+      '/login',
+      { email, password },
+      { requiresAuth: false }
+    );
 
-      if (!response.ok) {
-        const { error } = await response.json();
-        throw new Error(error || "Invalid credentials");
-      }
+    if (error) {
+      setError(error);
+      return;
+    }
 
-      const data = await response.json();
+    if (data?.token) {
       localStorage.setItem("token", data.token);
       router.push("/dashboard");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     }
   };
 

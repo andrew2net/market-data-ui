@@ -10,21 +10,31 @@ jest.mock('next/navigation', () => ({
   }),
 }))
 
-// Mock fetch globally
-const mockFetch = jest.fn()
-global.fetch = mockFetch
+// Mock the API client
+jest.mock('../../../lib/useApiClient', () => ({
+  useApiClient: jest.fn(),
+}))
+
+// Import the mocked useApiClient
+import { useApiClient } from '../../../lib/useApiClient'
+
+const mockPost = jest.fn()
+const mockApiClient = {
+  post: mockPost,
+}
 
 describe('LoginPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockFetch.mockClear()
+    mockPost.mockClear()
     localStorage.clear()
+    ;(useApiClient as jest.Mock).mockReturnValue(mockApiClient)
   })
 
-  it('renders the login form correctly', () => {
+  it('renders the login form correctly', async () => {
     render(<LoginPage />)
 
-    expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /login/i })).toBeInTheDocument()
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument()
@@ -34,7 +44,7 @@ describe('LoginPage', () => {
     const user = userEvent.setup()
     render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/email/i)
+    const emailInput = await screen.findByLabelText(/email/i)
     await user.type(emailInput, 'test@example.com')
 
     expect(emailInput).toHaveValue('test@example.com')
@@ -44,7 +54,7 @@ describe('LoginPage', () => {
     const user = userEvent.setup()
     render(<LoginPage />)
 
-    const passwordInput = screen.getByLabelText(/password/i)
+    const passwordInput = await screen.findByLabelText(/password/i)
     await user.type(passwordInput, 'password123')
 
     expect(passwordInput).toHaveValue('password123')
@@ -54,14 +64,14 @@ describe('LoginPage', () => {
     const user = userEvent.setup()
     const mockToken = 'mock-jwt-token'
 
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ token: mockToken }),
+    mockPost.mockResolvedValueOnce({
+      data: { token: mockToken },
+      error: null,
     })
 
     render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/email/i)
+    const emailInput = await screen.findByLabelText(/email/i)
     const passwordInput = screen.getByLabelText(/password/i)
     const submitButton = screen.getByRole('button', { name: /login/i })
 
@@ -69,18 +79,13 @@ describe('LoginPage', () => {
     await user.type(passwordInput, 'password123')
     await user.click(submitButton)
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3000/api/v1/login',
+    expect(mockPost).toHaveBeenCalledWith(
+      '/login',
       {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: 'test@example.com',
-          password: 'password123',
-        }),
-      }
+        email: 'test@example.com',
+        password: 'password123',
+      },
+      { requiresAuth: false }
     )
 
     await waitFor(() => {
@@ -93,14 +98,14 @@ describe('LoginPage', () => {
     const user = userEvent.setup()
     const errorMessage = 'Invalid credentials'
 
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({ error: errorMessage }),
+    mockPost.mockResolvedValueOnce({
+      data: null,
+      error: errorMessage,
     })
 
     render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/email/i)
+    const emailInput = await screen.findByLabelText(/email/i)
     const passwordInput = screen.getByLabelText(/password/i)
     const submitButton = screen.getByRole('button', { name: /login/i })
 
@@ -119,14 +124,14 @@ describe('LoginPage', () => {
   it('displays generic error message when no error message is provided', async () => {
     const user = userEvent.setup()
 
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({}),
+    mockPost.mockResolvedValueOnce({
+      data: null,
+      error: 'Invalid credentials',
     })
 
     render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/email/i)
+    const emailInput = await screen.findByLabelText(/email/i)
     const passwordInput = screen.getByLabelText(/password/i)
     const submitButton = screen.getByRole('button', { name: /login/i })
 
@@ -142,11 +147,14 @@ describe('LoginPage', () => {
   it('handles network errors gracefully', async () => {
     const user = userEvent.setup()
 
-    mockFetch.mockRejectedValueOnce(new Error('Network error'))
+    mockPost.mockResolvedValueOnce({
+      data: null,
+      error: 'Network error',
+    })
 
     render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/email/i)
+    const emailInput = await screen.findByLabelText(/email/i)
     const passwordInput = screen.getByLabelText(/password/i)
     const submitButton = screen.getByRole('button', { name: /login/i })
 
@@ -162,11 +170,14 @@ describe('LoginPage', () => {
   it('handles unexpected errors', async () => {
     const user = userEvent.setup()
 
-    mockFetch.mockRejectedValueOnce('Unexpected error')
+    mockPost.mockResolvedValueOnce({
+      data: null,
+      error: 'An unexpected error occurred',
+    })
 
     render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/email/i)
+    const emailInput = await screen.findByLabelText(/email/i)
     const passwordInput = screen.getByLabelText(/password/i)
     const submitButton = screen.getByRole('button', { name: /login/i })
 
@@ -183,14 +194,14 @@ describe('LoginPage', () => {
     const user = userEvent.setup()
 
     // First submission fails
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      json: async () => ({ error: 'Invalid credentials' }),
+    mockPost.mockResolvedValueOnce({
+      data: null,
+      error: 'Invalid credentials',
     })
 
     render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/email/i)
+    const emailInput = await screen.findByLabelText(/email/i)
     const passwordInput = screen.getByLabelText(/password/i)
     const submitButton = screen.getByRole('button', { name: /login/i })
 
@@ -203,9 +214,9 @@ describe('LoginPage', () => {
     })
 
     // Second submission succeeds
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ token: 'valid-token' }),
+    mockPost.mockResolvedValueOnce({
+      data: { token: 'valid-token' },
+      error: null,
     })
 
     await user.clear(emailInput)
@@ -219,10 +230,10 @@ describe('LoginPage', () => {
     })
   })
 
-  it('has proper form validation attributes', () => {
+  it('has proper form validation attributes', async () => {
     render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/email/i)
+    const emailInput = await screen.findByLabelText(/email/i)
     const passwordInput = screen.getByLabelText(/password/i)
 
     expect(emailInput).toHaveAttribute('type', 'email')
@@ -231,13 +242,13 @@ describe('LoginPage', () => {
     expect(passwordInput).toHaveAttribute('required')
   })
 
-  it('form has proper structure', () => {
+  it('form has proper structure', async () => {
     render(<LoginPage />)
 
-    const form = screen.getByRole('button', { name: /login/i }).closest('form')
+    const submitButton = await screen.findByRole('button', { name: /login/i })
+    const form = submitButton.closest('form')
     const emailInput = screen.getByLabelText(/email/i)
     const passwordInput = screen.getByLabelText(/password/i)
-    const submitButton = screen.getByRole('button', { name: /login/i })
 
     expect(form).toBeInTheDocument()
     expect(emailInput).toBeInTheDocument()

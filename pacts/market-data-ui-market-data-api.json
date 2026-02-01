@@ -4,6 +4,142 @@
   },
   "interactions": [
     {
+      "description": "a request for monthly candles for ticker 1 with date range",
+      "providerStates": [
+        {
+          "name": "Candles exist for ticker 1 for month period within date range"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/api/v1/tickers/1/candles",
+        "query": {
+          "date_from": [
+            "2025-01-01"
+          ],
+          "date_to": [
+            "2025-01-31"
+          ],
+          "period": [
+            "month"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "columns": [
+            "time",
+            "open",
+            "high",
+            "low",
+            "close",
+            "value"
+          ],
+          "data": [
+            [
+              1735689600,
+              100.12,
+              110.42,
+              95,
+              105.88,
+              12345.67
+            ],
+            [
+              1735689600,
+              100.12,
+              110.42,
+              95,
+              105.88,
+              12345.67
+            ]
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.data": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 2
+                }
+              ]
+            },
+            "$.data[*][0]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                },
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*][1]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                },
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*][2]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                },
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*][3]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                },
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*][4]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                },
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*][5]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                },
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
       "description": "a request for tickers with error_message as string",
       "providerStates": [
         {
@@ -140,6 +276,86 @@
               ]
             },
             "$.data[*].symbol": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to login with invalid credentials",
+      "providerStates": [
+        {
+          "name": "No user with provided credentials exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "email": "wrong@example.com",
+          "password": "wrongpassword"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/v1/login"
+      },
+      "response": {
+        "body": {
+          "error": "Invalid credentials"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 401
+      }
+    },
+    {
+      "description": "a request to login with valid credentials",
+      "providerStates": [
+        {
+          "name": "A user with valid credentials exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "email": "test@example.com",
+          "password": "password123"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/v1/login"
+      },
+      "response": {
+        "body": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.token": {
               "combine": "AND",
               "matchers": [
                 {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useApiClient } from "../lib/useApiClient";
 import  TickerBadge  from "./TickerBadge";
+import TickerCandlesChart from "./TickerCandlesChart";
 
 interface TickerDetailData {
   id: string;
@@ -151,19 +152,7 @@ export default function TickerDetail({ tickerId, onBack }: TickerDetailProps) {
       </div>
 
       <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Price Information</h4>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Market Data</h4>
-            </div>
-          </div>
-        </div>
+          <TickerCandlesChart tickerId={tickerId} />
       </div>
     </div>
   );
